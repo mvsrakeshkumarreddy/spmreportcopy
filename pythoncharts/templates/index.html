@@ -1,0 +1,1443 @@
+{% include 'applayout.html' %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+<body>
+
+
+
+   <div ng-app="chartApp" ng-controller="myCtrl">
+
+   
+
+
+
+
+    <div class="container" ng-show = "loading"> 
+    <center><img src="https://i.gifer.com/AqA0.gif" alt="centered image" height="400" width="400"> </center>
+    </div>
+
+   <!--
+      <input type="text" name="something" value="{{ today }}">
+       -->
+    
+   <div class="container" ng-hide = "loading">
+
+   <div class="row justify-content-md-center">
+      <form action="" method="POST" enctype="multipart/form-data">
+         <div ng-show = showdistspdform>
+            {% csrf_token %}
+            <br>
+            <input name="Cautionorders" type="hidden" value="{[{ Cautionorders }]}" />
+            <input name="cautionorderlength" type="hidden" value="{[{ Cautionorders.length }]}" />
+            <input name="routeset" type="hidden" value="{[{ routeset }]}" />
+
+            <div class="input-group">
+               <div class="input-group-text">
+                  <input class="form-check-input mt-0" type = "checkbox" ng-model = "selectstation" ng-click = "routecheck()" value="Select route by Station">
+                  <br>
+               </div>
+               <p>&nbsp;</p>
+               <div>
+                  <label class="col-form-label">Select route by Station</label>
+               </div>
+            </div>
+
+          <p></p>
+
+            <div ng-hide = "selectstation2">
+            <!--
+            <select class="form-select col-sm-10" aria-label="Default select example"  required = "required" name="routeid" ng-model="dropvalue" ng-click=dropvaluefun()>
+            -->
+            <select class="form-select col-sm-10" aria-label="Default select example"  name="routeid" ng-model="dropvalue" ng-click=dropvaluefun()>
+              <option selected value="">Please select Route</option>
+              <option value="JTJED">JTJ - ED</option>
+              <option value="EDJTJ">ED - JTJ</option>
+
+              <option value="TPTED">TPT - ED</option>
+              <option value="EDTPT">ED - TPT</option>
+
+              <option value="SAED">SA - ED</option>
+              <option value="EDSA">ED - SA</option>
+
+              <option value="JTJKPPR">JTJ - KPPR</option>
+              <option value="KPPRJTJ">KPPR - JTJ</option>
+
+              <option value="JTJCBE">JTJ - CBE</option>
+              <option value="CBEJTJ">CBE - JTJ</option>
+
+              <option value="SACBE">SA - CBE</option>
+              <option value="CBESA">CBE - SA</option>
+              
+              <option value="EDCBE">ED - CBE</option>
+              <option value="CBEED">CBE - ED</option>
+
+              <option value="EDCBF">ED - CBF</option>
+              <option value="CBFED">CBF - ED</option>
+
+              <option value="EDPLMD">ED - PLMD</option>
+              <option value="PLMDED">PLMD - ED</option>
+
+              <option value="EDIGU">ED - IGU</option>
+              <option value="IGUED">IGU - ED</option>
+
+              <option value="SATPJ">SA - TPJ</option>
+              <option value="TPJSA">TPJ - SA</option>
+
+              <option value="SAMTPP">SA - MTPP</option>
+              <option value="MTPPSA">MTPP - SA</option>
+
+              
+              <option value="EDTPJ">ED - TPJ</option>
+              <option value="TPJED">TPJ - ED</option>
+
+              <option value="KRRDG">KRR - DG</option>
+              <option value="DGKRR">DG - KRR</option>
+
+              <option value="EDPTJ">ED - PTJ(VIA IGU)</option>
+              <option value="PTJED">PTJ - ED(VIA IGU)</option>
+
+              <option value="EDPGTA">ED - PGT (A-LINE)</option>
+              <option value="PGTEDA">PGT - ED(A-LINE)</option>
+
+              <option value="EDMDKIA">ED - MDKI(A-LINE)</option>
+              <option value="MDKIEDA">MDKI - ED(A-LINE)</option>
+
+
+              <option value="EDPGTB">ED - PGT(B-LINE)</option>
+              <option value="PGTEDB">PGT - ED(B-LINE)</option>
+
+              <option value="EDMDKIB">ED - MDKI(B-LINE)</option>
+              <option value="MDKIEDB">MDKI - ED(B-LINE)</option>
+
+              <!--
+              <option value="3" ng-disabled="true">XXXXX</option>
+              -->
+            </select>
+
+              
+            </div>
+
+            <div class="input-group">
+               <label class="col-sm-2 col-form-label">Starting station:</label><br>
+            </div>
+            <div class="col-sm-10">
+               <input class="form-control" type="text" name="ststn" required="required" value="{{ sstn }}"  ng-model="dropvalueinput" oninput="this.value = this.value.toUpperCase()" style="width: 120%">
+            </div>
+
+
+
+            <div ng-show = "selectstation3">
+
+            <div class="input-group">
+               <label class="col-sm-2 col-form-label">Ending station:</label><br>
+            </div>
+            <div class="col-sm-10">
+               <input class="form-control" type="text" name="edstn" required="required" value="{{ estn }}"  ng-model="dropvalueinputend" oninput="this.value = this.value.toUpperCase()" style="width: 120%">
+            </div>
+
+            <div class="input-group">
+               <label class="col-sm-2 col-form-label">Via station:</label><br>
+            </div>
+            <select class="form-select col-sm-10" aria-label="Default select example"  name="vistn" ng-model="dropvalueinputvia">
+              <option selected value="">NONE</option>
+              <option value="ED">ED</option>
+              <option value="KRR">KRR</option>
+              <option value="MGSJ">MGSJ</option>
+              <option value="IGU">IGU</option>
+            </select>
+
+
+            
+          <p></p>
+ 
+            <button class="btn btn-primary" ng-hide = "routecheckbtnhide" ng-click = "checkroute()">Check Route</button>
+
+
+            </div>
+
+
+<!--
+            <div class="input-group">
+               <label class="col-sm-2 col-form-label">Please enter Distance values:</label><br>
+            </div>
+            <div class="col-sm-10">
+               <textarea class="form-control" ng-model="distlist" ng-list="&#10;" ng-trim="false" name="distlist" required="required"></textarea>
+            </div>
+            <div class="input-group">
+               <label class="col-sm-2 col-form-label">Please enter Speed values:</label><br>
+            </div>
+            <div class="col-sm-10">
+               <textarea  class="form-control" ng-model="spdlist" ng-list="&#10;" ng-trim="false" name="spdlist" required="required"></textarea>
+            </div>
+  -->
+
+          <div ng-hide = "selectstation1">
+            
+          
+              <div class="mb-3">
+          <label for="formFile" class="form-label">Please load Speedometer file with distance and speed values</label>
+               <input  class="form-control" type="file" name="spmfile" required="required" id="spmfile">
+        </div>
+          <p></p>
+           
+            <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the MAXIMUM PERMISSIBLE SPEED of the train in the section:</label>
+               <input  class="form-control" type="number" name="mps" max="110"  ng-model = "mps" required="required">
+        </div>
+          <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the Name of the LOCO PILOT:</label>
+               <input  class="form-control" id="nameoflp" value="{{nameoflp}}" type="text" name="nameoflp"  ng-model = "nameoflp" required="required" oninput="this.value = this.value.toUpperCase()">
+        </div>
+
+          <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the Train NO:</label>
+               <input  class="form-control" type="text" name="trainno"  ng-model = "trainno" required="required" oninput="this.value = this.value.toUpperCase()">
+        </div>
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the Loco No:</label>
+               <input  class="form-control" type="text" name="locono"  ng-model = "locono" required="required" placeholder="22222/22223">
+        </div>
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the Starting Date of the train:</label>
+               <input  class="form-control" type="date" name="startdate"  ng-model = "startdate" required="required">
+        </div>
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Please enter the ending Date of the train:</label>
+               <input  class="form-control" type="date" name="enddate" ng-model = "enddate" required="required">
+        </div>
+
+            <br>
+            <!--
+            <div class="input-group">
+               <div class="input-group-text">
+                  <input class="form-check-input mt-0" type="checkbox" name="spmtype" value="telpro">
+               </div>
+               <p>&nbsp;</p>
+               <div>
+                  <label class="col-form-label">Distance values whether of type incrementive</label>
+               </div>
+            </div>
+            <br>
+            -->
+            <div class="input-group">
+               <div class="input-group-text">
+                  <input class="form-check-input mt-0" type = "checkbox" ng-model = "enterplot" value="Enter from to plot details" ng-click = distspdvalues() ng-disabled = "enterplotdisabled"><br>
+               </div>
+               <p>&nbsp;</p>
+               <div>
+                  <label class="col-form-label">Would you like to enter from to plot details</label>
+               </div>
+            </div>
+            <br>
+            <div class="input-group" ng-show = "showfullgraphdiv">
+               <div class="input-group-text">
+                  <input class="form-check-input mt-0" type = "checkbox" ng-model = "showfullgraph" value="Enter from to plot details" ng-click = showfullgraphfun()>
+                  <br>
+               </div>
+               <p>&nbsp;</p>
+               <div>
+                  <label class="col-form-label">Would you like to show full graph</label>
+               </div>
+            </div>
+            <hr ng-show = "showfullgraph">
+
+            <table cellpadding="0" cellspacing="0" class="table" ng-show = "showfullgraph">
+            <tr>
+                <th ng-show = "cautioncheckbox"></th>
+                <th ng-show = "cautioncheckbox"></th>
+                <th>CAUTION STARTING KM</th>
+                <th>CAUTION ENDING KM</th>
+                <th>SPEED</th>
+                <th></th>
+            </tr>
+            <tbody ng-repeat="m in Cautionorders">
+                <tr class="table-primary">
+                    <td  ng-show="cautioncheckbox"><input  class="form-control" type="text" value="{[{m.cautioncheckboxvalue}]}" ng-disabled = true /></td>
+                    <td ng-show = "cautioncheckbox"></td>
+                    <td><input  class="form-control" type="text" value="{[{m.startingkm}]}" name="cautionorderstartingkm" ng-disabled = true /></td>
+                    <td><input  class="form-control" type="text" value="{[{m.endingkm}]}" name ="cautionorderendingkm" ng-disabled = true /></td>
+                    <td><input  class="form-control" type="number" value="{[{m.Speed}]}" name="cautionorderspeed" ng-disabled = true /></td>
+                    <td><input  class="btn btn-danger" type="button" ng-click="Remove($index)" value="Remove" /></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr> 
+                    <td  ng-show="cautioncheckboxSAKRR"><input   type="checkbox" ng-model="cautioncheckboxvalue1" ng-disabled="cautioncheckboxvalue2"> <label class="col-form-label">SA - KRR</label></td>
+                    <td  ng-show="cautioncheckboxKRRTPJ"><input   type="checkbox" ng-model="cautioncheckboxvalue2" ng-disabled="cautioncheckboxvalue1"> <label class="col-form-label">KRR - TPJ</label></td>
+
+                     <td  ng-show="cautioncheckboxJTJIGU"><input   type="checkbox" ng-model="cautioncheckboxvalue1" ng-disabled="cautioncheckboxvalue2"> <label class="col-form-label">JTJ - IGU</label></td>
+                    <td  ng-show="cautioncheckboxIGUCBE"><input   type="checkbox" ng-model="cautioncheckboxvalue2" ng-disabled="cautioncheckboxvalue1"> <label class="col-form-label">IGU - CBE</label></td>
+
+
+
+                    <td  ng-show="cautioncheckboxSAIGU"><input   type="checkbox" ng-model="cautioncheckboxvalue1" ng-disabled="cautioncheckboxvalue2"> <label class="col-form-label">SA - IGU</label></td>
+
+                    <td  ng-show="cautioncheckboxEDIGU"><input   type="checkbox" ng-model="cautioncheckboxvalue1" ng-disabled="cautioncheckboxvalue2"> <label class="col-form-label">ED - IGU</label></td>
+
+                    <td  ng-show="cautioncheckboxIGUCBF"><input   type="checkbox" ng-model="cautioncheckboxvalue2" ng-disabled="cautioncheckboxvalue1"> <label class="col-form-label">IGU - CBF</label></td>
+                    <td  ng-show="cautioncheckboxIGUPLMD"><input   type="checkbox" ng-model="cautioncheckboxvalue2" ng-disabled="cautioncheckboxvalue1"> <label class="col-form-label">IGU - PLMD</label></td>
+
+
+
+                    <td  ng-show="cautioncheckboxSAMGSJ"><input   type="checkbox" ng-model="cautioncheckboxvalue1" ng-disabled="cautioncheckboxvalue2"> <label class="col-form-label">SA - MGSJ</label></td>
+                    <td  ng-show="cautioncheckboxMGSJMTPP"><input   type="checkbox" ng-model="cautioncheckboxvalue2" ng-disabled="cautioncheckboxvalue1"> <label class="col-form-label">MGSJ - MTPP</label></td>
+                  
+                    <td><input  class="form-control"  type="text" ng-model="startingkm" placeholder="Ex:- 111/11" /></td>
+                    <td><input  class="form-control" type="text" ng-model="endingkm"  /></td>
+                    <td><input  class="form-control" type="number" ng-model="Speed" /></td>
+                    <td><input  class="btn btn-primary" type="button" ng-click="Add()" value="Add" /></td>
+                </tr>
+            </tfoot>
+</table>
+
+
+            <br>
+            <button class="btn btn-primary" type="submit" value="submit" ng-show = "showfullgraph" ng-click = loadingfun()>Show full graph</button>
+            <div ng-show = showplotinput>
+               <div class="input-group">
+                  <label class="col-sm-2 col-form-label">Please enter starting station for which plot is required:</label><br>
+               </div>
+               <div class="col-sm-10">
+                  <input class="form-control" type="text" name="pltststn" required="required" ng-model = "pltststn" ng-disabled = "!showplotinput" oninput="this.value = this.value.toUpperCase()">
+               </div>
+               <br>
+               <div class="input-group">
+                  <label class="col-sm-2 col-form-label">Please enter ending station for which plot is required:</label><br>
+               </div>
+               <div class="col-sm-10">
+                  <input class="form-control" type="text" name="pltendstn" required="required" ng-model = "pltendstn" ng-disabled = "!showplotinput" oninput="this.value = this.value.toUpperCase()">
+               </div>
+               <br>
+               <button class="btn btn-primary" type="submit" value="submit">Submit</button>
+            </div>
+            </div>
+      </form>
+      </div>
+
+   </div>
+  
+
+
+<div ng-hide = "enterplot">
+
+{% if mpsvalue is not null %}
+ <div class="input-group">
+               <div class="input-group-text">
+                  <input class="form-check-input mt-0" type = "checkbox" ng-model = "timegraph"  ng-click = timegraph = true; ><br>
+               </div>
+               <p>&nbsp;</p>
+               <div>
+                  <label class="col-form-label">Would you like to view the graph in time and speed values</label>
+               </div>
+            </div>
+            <br>
+</div>
+
+{% endif %}
+
+
+<div id="exp">
+  
+  
+<span ng-hide = "timegraph">
+  
+{% autoescape off %}
+  {{ plot_div }}
+  {% endautoescape %}
+</span>
+
+<span ng-show = "timegraph">
+  
+{% autoescape off %}
+  {{ plot_div2 }}
+  {% endautoescape %}
+</span>
+
+
+
+{% if mpsvalue is not null %}
+  <table class="table" id="tab">
+  <thead>
+    <tr>
+      <th scope="col">Feature</th>
+      <th scope="col">Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="table-primary">
+      <td>Name of Loco Pilot</td>
+      <td id="lpname" value = "{{nameoflp}}">{{nameoflp}}</td>
+    </tr>
+    <tr class="table-primary">
+      <td>Train NO</td>
+      <td id="train" value = "{{trainno}}">{{trainno}}</td>
+    </tr>
+    <tr class="table-primary">
+      <td>Loco NO</td>
+      <td id="loco" value = "{{locono}}">{{locono}}</td>
+    </tr>
+    <tr class="table-primary">
+      <td>Date of working</td>
+      <td id="date" value = "{{datevalue}}">{{datevalue}}</td>
+    </tr>
+   {% if mpsvalue == "MPS reached" %}
+    <tr class="table-info">
+    {% elif mpsvalue != "MPS reached" %}
+    <tr class="table-danger">
+    {% endif %}
+      <td>Maximum Permissible speed</td>
+      <td>{{mpsvalue}}</td>
+    </tr>
+    {% if mpsvalue == "MPS reached" %}
+    <tr class="table-info">
+    {% elif mpsvalue != "MPS reached" %}
+    <tr class="table-danger">
+    {% endif %}
+      <td>Maximum speed reached</td>
+      <td>{{mpsmaxvalue}}</td>
+    </tr>
+    <tr>
+    <tr class="table-info">
+      <td>Maximum Permissible Speed range Travelled</td>
+      <td>{{mpsdistance}}</td>
+    </tr>
+    <tr class="table-danger">
+      <td>Maximum Permissible Speed violation distance travelled</td>
+      <td>{{mpsviolateddistance}}</td>
+    </tr>
+    <tr class="table-info">
+      <td>Average Speed With Detention</td>
+      <td>{{avgspdwd}}</td>
+    </tr>
+    <tr class="table-info">
+      <td>Average Speed With out Detention</td>
+      <td>{{avgspdwod}}</td>
+    </tr>
+
+    {% if "not" in bftvalue %}
+    <tr class="table-danger">
+    {% else %}
+    <tr class="table-info">
+    {% endif %}
+      <td>Brake Feel Test</td>
+      <td>{{bftvalue}}</td>
+    </tr>
+    {% if "not" in bptvalue %}
+    <tr class="table-danger">
+    {% else %}
+    <tr class="table-info">
+    {% endif %}
+       <td>Brake Power Test</td>
+      <td>{{bptvalue}}</td>
+    </tr>
+    {% if violated in violatedvalue %}
+    <tr class="table-danger">
+    {% else %}
+    <tr class="table-info">
+    {% endif %}
+       <td>Caution Violations</td>
+      <td>{{violatedvalue}}</td>
+    </tr>
+     <tr class="table-danger">
+       <td >Stopping Stations</td>
+      <td><ul class="list-group">
+{% for stoppings in stoppingstations %}
+    <li class="list-group-item list-group-item-warning">{{ stoppings }}</li>
+{% endfor %}
+</ul></td>
+    </tr>
+    <tr class="table-danger">
+       <td >Signal locations where speed was controlled morethan 40 percent and brought below 30KMPH</td>
+      <td><ul class="list-group">
+{% for latesignal in latesignals %}
+    <li class="list-group-item list-group-item-warning">{{ latesignal }}</li>
+{% endfor %}
+</ul></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+    
+          <!--
+           <button class="btn btn-primary" type="button" value="Create PDF" onclick = "createPDF()" >Export</button>
+           -->
+           <button class="btn btn-primary" id="download" >Export</button>
+
+  </p>
+{% endif %}
+
+   <!--
+    <p>{{mpsvalue}}</p>
+      <textarea ng-model="signalkm" ng-list="&#10;" ng-trim="false"></textarea>
+      <p ng-bind="signalkm"></p>
+      
+      
+      <textarea ng-model="signalname" ng-list="&#10;" ng-trim="false"></textarea>
+      <p ng-bind="signalname"></p>
+      <p>Welcome {{today}}</p>
+        <p>Name: <input type="text" ng-model="name"></p>
+        <p ng-bind="list1"></p>
+        <input type="submit" ng-click=check() value="submit">
+      
+      <textarea ng-model="list1" ng-list="&#10;" ng-trim="false"></textarea>
+      
+      </div>
+      
+      <p>Welcome to my first Django project! {{minvalue}}</p>
+      <p>you have entered  {{inputvalue}}</p>
+      -->
+   <!--
+      <form action = "" method = "POST">
+        {% csrf_token %}
+        <label for="ivalue">Your name: </label>
+        <input id="ivalue" type="text" name="ivalue">
+        <input type="submit" value="OK">
+      </form>
+      -->
+   <script>
+      var app = angular.module('chartApp', []);
+
+       app.config(function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{[{');
+  $interpolateProvider.endSymbol('}]}');
+});
+      app.controller('myCtrl', function($scope, $window) {
+        $scope.name= "Rakesh";
+        $scope.showdistspdform = true;
+        $scope.showplotinput = false;
+        $scope.enterplotdisabled = false;
+        $scope.showfullgraphdiv = true;
+        $scope.timegraph = false;
+        $scope.selectstation1 = false;
+        $scope.selectstation2 = false;
+        $scope.selectstation3 = false;
+        $scope.routeset = [];
+
+        $scope.routecheck = function()
+        {
+          $scope.selectstation1 = !$scope.selectstation1;
+          $scope.selectstation2 = !$scope.selectstation2;
+          $scope.selectstation3 = !$scope.selectstation3;
+
+          if($scope.selectstation == true)
+          {
+            $scope.selectstation3 = true;
+            $scope.selectstation2 = true;
+            $scope.routecheckbtnhide = false;
+          };
+        };
+
+/*
+  $scope.dropvalueinput = "SA";
+    $scope.dropvalueinputend = "TPJ";
+ */
+    $scope.routes = [["JTJ","TPT","KEY","SLY","DST","DPI","MAP","BDY","BQI","LCR","DSPT","TNT","KPPR","MGSJ","SA","VRPD","DC","MVPM","SGE","ANU","CV","ED","TPM","PY","IGR","VZ","UKL","TUP","VNJ","SNO","SUU","IGU","PTJ"],["PTJ","IGU","SUU","SNO","VNJ","TUP","UKL","VZ","IGR","PY","TPM","ED","CV","ANU","SGE","MVPM","DC","VRPD","SA","MGSJ","KPPR","TNT","DSPT","LCR","BQI","BDY","MAP","DPI","DST","SLY","KEY","TPT","JTJ"],["SA","MALR","RASP","KLGN","NMKL","MONR","KRR"],["KRR","MONR","NMKL","KLGN","RASP","MALR","SA"],["ED","CVD","PAS","URL","KMD","PGR","MPLM","KRR","VRQ","MYU","MMH","LP","KLT","PLI","PGN","EL","MTNL","TP","TPJ"],["TPJ","TP","MTNL","EL","PGN","PLI","KLT","LP","MMH","MYU","VRQ","KRR","MPLM","PGR","KMD","URL","PAS","CVD","ED"],["IGU","PLMD","CBF","CBE"],["CBE","CBF","PLMD","IGU"],["MGSJ","OML","MCRD","MTDM","MTPP"],["MTPP","MTDM","MCRD","OML","MGSJ"]];
+    
+ 
+ $scope.checkroute = function() {
+ 
+ $scope.firstroutes = [];
+ $scope.lastroutes = [];
+$scope.new = [];
+$scope.splitroute = [];
+$scope.newcheck = 0;
+$scope.routefound = 0;
+
+$scope.firstmulroutes = [];
+$scope.lastmulroutes = [];
+$scope.lastmulfinal = 0;
+$scope.viastation = " ";
+$scope.via = [];
+
+
+if($scope.routefound == 0)
+{
+  for(var i = 0;i<$scope.routes.length;i++)
+    {
+      $scope.fstn = 0;
+        $scope.lstn = 0;
+      for(var a = 0;a<$scope.routes[i].length;a++)
+        {
+          if($scope.routes[i][a] == $scope.dropvalueinput)
+            {
+              $scope.fstn = 1;
+            };
+            if($scope.routes[i][a] == $scope.dropvalueinputend)
+            {
+              $scope.lstn = 1;
+            };
+        };
+        if($scope.fstn == 1 && $scope.lstn == 1)
+        {
+          $scope.routefound = "found";
+            $scope.routetype = "conroute";
+            //$window.alert("found");
+        };
+    };
+};
+
+if($scope.routefound == 0)
+{
+  for(var i = 0;i<$scope.routes.length;i++)
+    {
+      
+      for(var a = 0;a<$scope.routes[i].length;a++)
+      {
+        if ($scope.routes[i][a] == $scope.dropvalueinput)
+        {
+          $scope.firstmulroutes.push(i);
+        };
+      };
+        
+        
+      for(var b = 0;b<$scope.routes[i].length;b++)
+      {
+        if ($scope.routes[i][b] == $scope.dropvalueinputend)
+        {
+          $scope.lastmulroutes.push(i);
+        };
+      };
+       
+    };
+    
+  
+    
+    
+      for(var i = 0;i<$scope.firstmulroutes.length;i++)
+        {
+          for(var a = 0;a<($scope.routes[$scope.firstmulroutes[i]]).length;a++)
+            { 
+              //$scope.viastation.push($scope.routes[$scope.firstmulroutes[i]][a]);
+                for(var c = 0;c<$scope.lastmulroutes.length;c++)
+                {
+                  for(var b = 0;b<$scope.routes[$scope.lastmulroutes[c]].length;b++)
+                  {
+                  if($scope.routes[$scope.firstmulroutes[i]][a] == $scope.routes[$scope.lastmulroutes[c]][b])
+                    {
+                      $scope.viastation = $scope.routes[$scope.firstmulroutes[i]][a];
+                        $scope.via.push($scope.routes[$scope.firstmulroutes[i]][a]);
+                    };
+                  
+                  };
+                };
+              
+            };
+        };
+        
+        if($scope.dropvalueinputvia != null)
+        {
+          $scope.viastation = $scope.dropvalueinputvia;
+        }
+   
+    $scope.firstarr = Array.from('N'.repeat($scope.firstmulroutes.length));
+    $scope.lastarr = Array.from('Y'.repeat($scope.lastmulroutes.length));
+
+    $scope.firstsplit = [];
+    $scope.lastsplit = [];
+   
+    for(var i = 0;i<$scope.firstmulroutes.length;i++)
+    {
+      for(var b = ($scope.routes[$scope.firstmulroutes[i]].indexOf($scope.dropvalueinput));b<$scope.routes[$scope.firstmulroutes[i]].length;b++)
+        {
+          if($scope.routes[$scope.firstmulroutes[i]][b] == $scope.viastation)
+            {
+              $scope.firstarr[i] = "Y";
+            };
+        };
+    };
+    
+    for(var i = 0;i<$scope.firstmulroutes.length;i++)
+    {
+      if($scope.firstarr[i] == "Y")
+        {
+          for(var a = ($scope.routes[$scope.firstmulroutes[i]].indexOf($scope.dropvalueinput));a<($scope.routes[$scope.firstmulroutes[i]].indexOf($scope.viastation));a++)
+            {
+              $scope.firstsplit.push($scope.routes[$scope.firstmulroutes[i]][a]);
+            };
+        };
+    };
+    
+    
+    for(var i = 0;i<$scope.lastmulroutes.length;i++)
+    { 
+      $scope.viastationfound = false;
+      for(var a = 0;a<$scope.routes[$scope.lastmulroutes[i]].length;a++)
+        {
+          if($scope.routes[$scope.lastmulroutes[i]][a] == $scope.viastation)
+            {
+              $scope.viastationfound = true;
+            };
+        };
+        if($scope.viastationfound == false)
+        {
+          $scope.lastarr[i] = "N";
+        };
+    };
+    
+    
+    for(var i = 0;i<$scope.lastmulroutes.length;i++)
+    {
+      for(var b = ($scope.routes[$scope.lastmulroutes[i]].indexOf($scope.dropvalueinputend));b<$scope.routes[$scope.lastmulroutes[i]].length;b++)
+        {
+          if($scope.routes[$scope.lastmulroutes[i]][b] == $scope.viastation)
+            {
+              $scope.lastarr[i] = "N";
+            };
+        };
+    };
+    
+    
+    
+    for(var i = 0;i<$scope.lastmulroutes.length;i++)
+    {
+      if($scope.lastarr[i] == "Y")
+        {
+          for(var a = ($scope.routes[$scope.lastmulroutes[i]].indexOf($scope.viastation));a<=($scope.routes[$scope.lastmulroutes[i]].indexOf($scope.dropvalueinputend));a++)
+            {
+              $scope.lastsplit.push($scope.routes[$scope.lastmulroutes[i]][a]);
+            };
+        };
+    };
+    
+    
+    $scope.splitroute = $scope.firstsplit.concat($scope.lastsplit);
+ 
+if($scope.firstsplit.length !=0 && $scope.lastsplit.length !=0)
+{
+  $scope.routefound = "found";
+    $scope.routetype = "splitroute";
+};
+
+};
+
+
+if($scope.routefound == 0)
+{
+  $window.alert("Route not found, please select from available routes");
+};
+
+
+
+for(var i = 0;i<$scope.firstmulroutes.length;i++)
+{
+  if($scope.firstarr[i] == "Y")
+    {
+      $scope.fstnarrind = $scope.firstmulroutes[i];
+    };
+};
+
+for(var i = 0;i<$scope.lastmulroutes.length;i++)
+{
+  if($scope.lastarr[i] == "Y")
+    {
+      $scope.lstnarrind = $scope.lastmulroutes[i];
+    };
+};
+
+$scope.routeset = [$scope.routefound,$scope.fstnarrind,$scope.lstnarrind,$scope.routetype];
+
+$window.alert($scope.routeset);
+
+/*
+$window.alert($scope.routefound);
+$window.alert($scope.fstnarrind);
+$window.alert($scope.lstnarrind);
+$window.alert($scope.viastation);
+$window.alert($scope.routetype);
+$window.alert($scope.splitroute);
+*/
+
+if($scope.routefound == 0)
+{
+  $scope.selectstation = false;
+  $scope.selectstation2 = false;
+  $scope.selectstation1 = false;
+  $scope.selectstation3 = false;
+};
+if($scope.routefound != 0)
+{
+  $scope.selectstation = false;
+  $scope.selectstation1 = false;
+  $scope.selectstation2 = true;
+  $scope.selectstation3 = true;
+  $scope.routecheckbtnhide = true;
+};
+
+
+};
+
+
+      
+
+        $scope.distspdvalues = function()
+        {
+          if ($scope.enterplot == true)
+          {
+            $scope.showfullgraphdiv = false;
+            $scope.showfullgraph = false;
+            $scope.showplotinput  = true;
+          }
+          if ($scope.enterplot == false)
+          {
+            $scope.showfullgraphdiv = true;
+            $scope.showfullgraph = false;
+            $scope.showplotinput  = false;
+          }
+          //$scope.showdistspdform = false;
+          
+        };
+        $scope.firstcheck = function()
+        {
+          if ($scope.enterplotagain == true)
+          {
+            $scope.startfrombegin = false;
+          }
+        };
+        $scope.secondcheck  = function()
+        {
+          if ($scope.startfrombegin == true)
+          {
+            $scope.enterplotagain = false;
+          }
+        };
+        $scope.distspdvaluesinv = function()
+        {
+          $scope.repeatselect = true;
+        };
+        $scope.repeatfunction = function()
+        {
+          if ($scope.enterplotagain == true)
+          {
+            $scope.repeatselect = false;
+            $scope.showplotinput = true;
+          }
+          if ($scope.startfrombegin == true)
+          {
+            $scope.repeatselect = false;
+            $scope.showdistspdform = true;
+          }
+        };
+        $scope.showfullgraphfun  = function()
+        {
+            if ($scope.enterplotdisabled == true)
+            {
+      
+              $scope.enterplotdisabled = false;
+            }
+            else if ($scope.enterplotdisabled == false)
+            {
+      
+              $scope.enterplotdisabled = true;
+            }
+        };
+        $scope.check = function()
+        {
+          $scope.yes = true;
+        };
+        $scope.dropvaluefun = function()
+        {
+          $scope.cautioncheckbox = false;
+          if ($scope.dropvalue == "JTJED")
+          {
+            $scope.dropvalueinput = "JTJ"
+            $scope.dropvalueinputend = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "SAED")
+          {
+            $scope.dropvalueinput = "SA"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDSA")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDJTJ")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "JTJKPPR")
+          {
+            $scope.dropvalueinput = "JTJ"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "KPPRJTJ")
+          {
+            $scope.dropvalueinput = "KPPR"
+            $scope.Cautionorders = [];
+          }
+
+
+          if ($scope.dropvalue == "TPTED")
+          {
+            $scope.dropvalueinput = "TPT"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDTPT")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "SATPJ")
+          {
+            $scope.dropvalueinput = "SA"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxKRRTPJ = true;
+            $scope.cautioncheckboxSAKRR = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "TPJSA")
+          {
+            $scope.dropvalueinput = "TPJ"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxKRRTPJ = true;
+            $scope.cautioncheckboxSAKRR = true;
+            $scope.Cautionorders = [];
+          }
+           if ($scope.dropvalue == "SAMTPP")
+          {
+            $scope.dropvalueinput = "SA"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxMGSJMTPP = true;
+            $scope.cautioncheckboxSAMGSJ = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "MTPPSA")
+          {
+            $scope.dropvalueinput = "MTPP"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxMGSJMTPP = true;
+            $scope.cautioncheckboxSAMGSJ = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "JTJCBE")
+          {
+            $scope.dropvalueinput = "JTJ"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxJTJIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "CBEJTJ")
+          { 
+            $scope.dropvalueinput = "CBE"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxJTJIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "SACBE")
+          {
+            $scope.dropvalueinput = "SA"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxSAIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "CBESA")
+          { 
+            $scope.dropvalueinput = "CBE"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxSAIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDCBE")
+          { 
+            $scope.dropvalueinput = "ED"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+
+          if ($scope.dropvalue == "CBEED")
+          { 
+            $scope.dropvalueinput = "CBE"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUCBE = true;
+            $scope.Cautionorders = [];
+          }
+
+          if ($scope.dropvalue == "CBFED")
+          { 
+            $scope.dropvalueinput = "CBF"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUCBF = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDCBF")
+          { 
+            $scope.dropvalueinput = "ED"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUCBF = true;
+            $scope.Cautionorders = [];
+          }
+
+          if ($scope.dropvalue == "PLMDED")
+          { 
+            $scope.dropvalueinput = "PLMD"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUPLMD = true;
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDPLMD")
+          { 
+            $scope.dropvalueinput = "ED"
+            $scope.cautioncheckbox = true;
+            $scope.cautioncheckboxEDIGU = true;
+            $scope.cautioncheckboxIGUPLMD = true;
+            $scope.Cautionorders = [];
+          }
+
+
+          if ($scope.dropvalue == "EDTPJ")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "TPJED")
+          {
+            $scope.dropvalueinput = "TPJ"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDIGU")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "IGUED")
+          {
+            $scope.dropvalueinput = "IGU"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "KRRDG")
+          {
+            $scope.dropvalueinput = "KRR"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "DGKRR")
+          {
+            $scope.dropvalueinput = "DG"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDPTJ")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "PTJED")
+          {
+            $scope.dropvalueinput = "PTJ"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "PGTEDA")
+          {
+            $scope.dropvalueinput = "PGT"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDPGTA")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDMDKIA")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "MDKIEDA")
+          {
+            $scope.dropvalueinput = "MDKI"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDPGTB")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "PGTEDB")
+          {
+            $scope.dropvalueinput = "PGT"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "EDMDKIB")
+          {
+            $scope.dropvalueinput = "ED"
+            $scope.Cautionorders = [];
+          }
+          if ($scope.dropvalue == "MDKIEDB")
+          {
+            $scope.dropvalueinput = "MDKI"
+            $scope.Cautionorders = [];
+          }
+        };
+
+
+
+              $scope.Cautionorders = [];
+      $scope.cautionorderlength = $scope.Cautionorders.length;
+      $scope.cautioncheckboxvalue1 = false;
+      $scope.cautioncheckboxvalue2 = false;
+ 
+            $scope.Add = function () {
+                //Add the new item to the Array.
+                //$window.alert("Please enter Starting KM");
+                var newcautionorder = {};
+                
+                if (typeof ($scope.startingkm) == "undefined" || typeof($scope.endingkm) == "undefined" || typeof($scope.Speed) == "undefined")
+                {
+                  if((typeof($scope.startingkm) == "undefined" && typeof($scope.endingkm) == "undefined") || (typeof($scope.startingkm) == "undefined" && typeof($scope.Speed) == "undefined") || (typeof($scope.endingkm) == "undefined" && typeof($scope.Speed) == "undefined"))
+                  {
+                    $window.alert("Please fill all the columns of a row before addition of new caution");
+                  }
+                  else
+                  {
+
+                  if (typeof($scope.startingkm) == "undefined")
+                  {
+                    $window.alert("Please enter Starting KM");
+                  }
+                  if (typeof($scope.endingkm) == "undefined")
+                  {
+                    $window.alert("Please enter Ending KM");
+                  }
+                  if (typeof($scope.Speed) == "undefined")
+                  {
+                    $window.alert("Please enter Speed");
+                  }
+                  }
+                }
+                else if ($scope.startingkm == "" || $scope.endingkm == "" || $scope.Speed == "")
+                {
+                  if(($scope.startingkm == "" && $scope.endingkm == "") || ($scope.startingkm == "" && $scope.Speed == "") || ($scope.endingkm == "" && $scope.Speed == ""))
+                  {
+                    $window.alert("Please fill all the columns of a row before addition of new caution");
+                  }
+                  else
+                  {
+
+                  if ($scope.startingkm == "")
+                  {
+                    $window.alert("Please enter Starting KM");
+                  }
+                  if ($scope.endingkm == "")
+                  {
+                    $window.alert("Please enter Ending KM");
+                  }
+                  if ($scope.Speed == "")
+                  {
+                    $window.alert("Please enter Speed");
+                  }
+                  }
+                }
+                else if (($scope.dropvalue == "TPJSA") || ($scope.dropvalue == "SATPJ") || ($scope.dropvalue == "EDPLMD") || ($scope.dropvalue == "PLMDED") || ($scope.dropvalue == "EDCBF") || ($scope.dropvalue == "CBFED") || ($scope.dropvalue == "EDCBE") || ($scope.dropvalue == "CBEED") || ($scope.dropvalue == "MTPPSA") || ($scope.dropvalue == "SAMTPP") || ($scope.dropvalue == "JTJCBE") || ($scope.dropvalue == "CBEJTJ") || ($scope.dropvalue == "SACBE") || ($scope.dropvalue == "CBESA"))
+                {
+                  if ($scope.cautioncheckboxvalue1 == false && $scope.cautioncheckboxvalue2 == false)
+                  {
+                    $window.alert("please select the caution route");
+                  }
+                  else
+                {
+                  newcautionorder.startingkm = $scope.startingkm;
+                  newcautionorder.endingkm = $scope.endingkm;
+                  newcautionorder.Speed = $scope.Speed;
+                  if ($scope.dropvalue == "TPJSA" || $scope.dropvalue == "SATPJ")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - KRR";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "KRR - TPJ";
+                    }
+                  }
+                  if ($scope.dropvalue == "MTPPSA" || $scope.dropvalue == "SAMTPP")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - MGSJ";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "MGSJ - MTPP";
+                    }
+                  }
+                  if ($scope.dropvalue == "CBEJTJ" || $scope.dropvalue == "JTJCBE")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "JTJ - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+                  if ($scope.dropvalue == "CBESA" || $scope.dropvalue == "SACBE")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+
+                  if ($scope.dropvalue == "EDCBE" || $scope.dropvalue == "CBEED")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+
+                  if ($scope.dropvalue == "EDCBF" || $scope.dropvalue == "CBFED")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBF";
+                    }
+                  }
+
+                  if ($scope.dropvalue == "EDPLMD" || $scope.dropvalue == "PLMDED")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - PLMD";
+                    }
+                  }
+
+
+                  $scope.Cautionorders.push(newcautionorder);
+
+                  //Clear the TextBoxes.
+                  $scope.startingkm = "";
+                  $scope.endingkm = "";
+                  $scope.Speed = "";
+                  $scope.cautioncheckboxvalue1 = false;
+                  $scope.cautioncheckboxvalue2 = false;
+                  
+                }
+                }
+                else
+                {
+                  newcautionorder.startingkm = $scope.startingkm;
+                  newcautionorder.endingkm = $scope.endingkm;
+                  newcautionorder.Speed = $scope.Speed;
+                  if ($scope.dropvalue == "TPJSA" || $scope.dropvalue == "SATPJ")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - KRR";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "KRR - TPJ";
+                    }
+                  }
+                  if ($scope.dropvalue == "MTPPSA" || $scope.dropvalue == "SAMTPP")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - MGSJ";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "MGSJ - MTPP";
+                    }
+                  }
+                  if ($scope.dropvalue == "CBEJTJ" || $scope.dropvalue == "JTJCBE")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "JTJ - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+                  if ($scope.dropvalue == "CBESA" || $scope.dropvalue == "SACBE")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "SA - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+                  if ($scope.dropvalue == "EDCBE" || $scope.dropvalue == "CBEED")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBE";
+                    }
+                  }
+
+                  if ($scope.dropvalue == "EDCBF" || $scope.dropvalue == "CBFED")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - CBF";
+                    }
+                  }
+                  if ($scope.dropvalue == "PLMDED" || $scope.dropvalue == "EDPLMD")
+                  {
+                    if ($scope.cautioncheckboxvalue1 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "ED - IGU";
+                    }
+                    if ($scope.cautioncheckboxvalue2 == true)
+                    {
+                      newcautionorder.cautioncheckboxvalue = "IGU - PLMD";
+                    }
+                  }
+
+                  $scope.Cautionorders.push(newcautionorder);
+
+                  //Clear the TextBoxes.
+                  $scope.startingkm = "";
+                  $scope.endingkm = "";
+                  $scope.Speed = "";
+                  $scope.cautioncheckboxvalue1 = false;
+                  $scope.cautioncheckboxvalue2 = false;
+                  
+                }
+ 
+            };
+ 
+            $scope.Remove = function (index) {
+                //Find the record using Index from Array.
+                var start = $scope.Cautionorders[index].startingkm;
+                var end = $scope.Cautionorders[index].endingkm;
+                if ($window.confirm("Do you want to delete: " + start + "----" + end)) {
+                    //Remove the item from Array using Index.
+                    $scope.Cautionorders.splice(index, 1);
+                }
+            };
+            $scope.loading = false;
+
+
+          
+     
+
+            $scope.loadingfun = function()
+            {
+              //if ($scope.dropvalue != null && $scope.dropvalueinput != null && $scope.mps !=null && $scope.nameoflp != null && $scope.trainno != null && $scope.locono != null && $scope.startdate != null && $scope.enddate != null)
+              if ($scope.dropvalueinput != null && $scope.mps !=null && $scope.nameoflp != null && $scope.trainno != null && $scope.locono != null && $scope.startdate != null && $scope.enddate != null) 
+              {
+              var spmfile = document.getElementById("spmfile");
+              if(spmfile.files.length == 0 )
+              {
+                $window.alert("Please load SPM file");
+              }
+              else
+              {
+                $scope.loading = true;
+              }
+              }
+              else
+              {
+                $window.alert("Please fill all the details");
+              }
+              
+            };
+
+
+
+    
+      });
+   </script>
+   <script>
+    function createPDF() {
+        var sTable = document.getElementById('exp').innerHTML;
+
+        var style = "<style>";
+        style = style + "table {width: 100%;font: 17px Calibri;}";
+        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+        style = style + "padding: 2px 3px;text-align: center;}";
+        style = style + "</style>";
+
+        // CREATE A WINDOW OBJECT.
+        var win = window.open('', '', 'height=700,width=700');
+
+        win.document.write('<html><head>');
+        win.document.write('<title>Profile</title>');   // <title> FOR PDF HEADER.
+        win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
+        win.document.write('</head>');
+        win.document.write('<body>');
+        win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
+        win.document.write('</body></html>');
+
+        win.document.close();   // CLOSE THE CURRENT WINDOW.
+
+        win.print();    // PRINT THE CONTENTS.
+
+    }
+</script>
+<script>
+  window.onload = function(){
+    document.getElementById("download").addEventListener("click", ()=>{
+      const exp = this.document.getElementById("exp");
+      const element = document.getElementById("lpname"); 
+      let name = element.getAttribute("value");
+      const element1 = document.getElementById("train"); 
+      let train = element1.getAttribute("value")
+      const element2 = document.getElementById("loco"); 
+      let loco = element2.getAttribute("value")
+      const element3 = document.getElementById("date"); 
+      let date = element3.getAttribute("value")
+      const pdfname = name + ' - ' + train + ' - ' + loco + ' - ' + date;
+
+      //console.log(pdfname)
+      
+      var opt = {
+  margin:       1,
+  filename:     'myfile.pdf',
+  image:        { type: 'jpeg', quality: 0.98 },
+  html2canvas:  { width : 1300 },
+  jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+};
+
+
+      html2pdf().set(opt).from(exp).save(pdfname);
+    })
+  }
+</script>
+</body>
+{% endblock %}
